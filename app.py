@@ -3,15 +3,17 @@ import os
 import re
 import time
 
-import openai
 import streamlit as st
 from dotenv import load_dotenv
+from openai import OpenAI
 from openai.types.beta.threads import MessageContentImageFile
+
+from components.assistant_id import assistant_input_component
 
 load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
-client = openai.OpenAI(api_key=api_key)
+client = OpenAI(api_key=api_key)
 instructions = os.getenv("RUN_INSTRUCTIONS", "")
 
 
@@ -137,12 +139,19 @@ def disable_form():
 
 
 def main():
-    st.title("Assistants API UI")
-
+    # Initialize state
     if "assistant_id" not in st.session_state:
         st.session_state.assistant_id = ""
+    if "assistant_name" not in st.session_state:
+        st.session_state.assistant_name = ""
 
-    st.session_state.assistant_id = st.text_input("Enter your Assistant Id")
+    # Title
+    if st.session_state.assistant_name == "":
+        st.title("Assistants API UI")
+    else:
+        st.title(st.session_state.assistant_name)
+
+    assistant_input_component()
 
     user_msg = st.chat_input(
         "Message", on_submit=disable_form, disabled=st.session_state.in_progress
