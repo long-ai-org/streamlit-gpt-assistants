@@ -1,19 +1,19 @@
-import os
-import time
-import glob
 import base64
+import os
 import re
+import time
 
-import streamlit as st
 import openai
+import streamlit as st
+from dotenv import load_dotenv
 from openai.types.beta.threads import MessageContentImageFile
 
+load_dotenv()
 
-# OpenAI APIキーの設定
-api_key = os.environ.get("OPENAI_API_KEY")
+api_key = os.getenv("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=api_key)
-assistant_id = os.environ.get("ASSISTANT_ID")
-instructions = os.environ.get("RUN_INSTRUCTIONS", "")
+assistant_id = os.getenv("ASSISTANT_ID")
+instructions = os.getenv("RUN_INSTRUCTIONS", "")
 
 
 def create_thread(content, file):
@@ -100,7 +100,7 @@ def get_message_list(thread, run):
         if run.status == "completed":
             completed = True
         else:
-            time.sleep(5)
+            time.sleep(3)
 
     messages = client.beta.threads.messages.list(thread_id=thread.id)
     return get_message_value_list(messages)
