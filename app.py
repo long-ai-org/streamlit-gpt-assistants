@@ -12,7 +12,6 @@ load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=api_key)
-assistant_id = os.getenv("ASSISTANT_ID")
 instructions = os.getenv("RUN_INSTRUCTIONS", "")
 
 
@@ -38,7 +37,7 @@ def create_message(thread, content, file):
         file_ids.append(file.id)
 
 
-def create_run(thread):
+def create_run(thread, assistant_id):
     run = client.beta.threads.runs.create(
         thread_id=thread.id, assistant_id=assistant_id, instructions=instructions
     )
@@ -106,12 +105,12 @@ def get_message_list(thread, run):
     return get_message_value_list(messages)
 
 
-def get_response(user_input, file):
+def get_response(user_input, file, assistant_id):
     if "thread" not in st.session_state:
         st.session_state.thread = create_thread(user_input, file)
     else:
         create_message(st.session_state.thread, user_input, file)
-    run = create_run(st.session_state.thread)
+    run = create_run(st.session_state.thread, assistant_id)
     return "\n".join(get_message_list(st.session_state.thread, run))
 
 
@@ -139,6 +138,12 @@ def disable_form():
 
 def main():
     st.title("Assistants API UI")
+
+    if "assistant_id" not in st.session_state:
+        st.session_state.assistant_id = ""
+
+    st.session_state.assistant_id = st.text_input("Enter your Assistant Id")
+
     user_msg = st.chat_input(
         "Message", on_submit=disable_form, disabled=st.session_state.in_progress
     )
@@ -165,7 +170,7 @@ def main():
         file = None
         if uploaded_file is not None:
             file = handle_uploaded_file(uploaded_file)
-        response = get_response(user_msg, file)
+        response = get_response(user_msg, file, st.session_state.assistant_id)
         with st.chat_message("Assistant"):
             st.markdown(response, True)
 
