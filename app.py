@@ -100,6 +100,9 @@ def get_message_list(thread, run):
         print("messages:", "\n".join(get_message_value_list(messages)))
         if run.status == "completed":
             completed = True
+        elif run.status == "failed":
+            # exit the loop
+            break
         else:
             time.sleep(3)
 
@@ -151,7 +154,15 @@ def main():
     else:
         st.title(st.session_state.assistant_name)
 
-    assistant_input_component()
+    client.api_key = st.text_input(label="Enter your OpenAI API key")
+
+    st.session_state.assistant_id = st.text_input(
+        label="Enter your assistant_id",
+    )
+
+    if st.session_state.assistant_id and not st.session_state.assistant_id == "":
+        assistant = client.beta.assistants.retrieve(st.session_state.assistant_id)
+        st.session_state.assistant_name = assistant.name
 
     user_msg = st.chat_input(
         "Message", on_submit=disable_form, disabled=st.session_state.in_progress
