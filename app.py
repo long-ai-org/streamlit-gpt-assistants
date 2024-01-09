@@ -8,8 +8,6 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.beta.threads import MessageContentImageFile
 
-from components.assistant_id import assistant_input_component
-
 load_dotenv()
 
 api_key = os.getenv("OPENAI_API_KEY")
